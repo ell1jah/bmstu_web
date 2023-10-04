@@ -43,3 +43,7 @@
 ![](./assets/use-case-auth.jpg)
 
 ![](./assets/use-case-nonauth.jpg)
+
+## BPMN диаграмма основных бизнес-процессов
+
+![](./assets/bpmn.jpg)
