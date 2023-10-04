@@ -76,3 +76,19 @@
 ## Компонентная диаграмма системы
 
 ![](./assets/components.jpg)
+
+## Экраны будущего web-приложения на уровне черновых эскизов
+
+![](./assets/screens-main.svg)
+
+![](./assets/screens-post.svg)
+
+![](./assets/screens-profile.svg)
+
+![](./assets/screens-auth.svg)
+
+![](./assets/screens-reg.svg)
+
+![](./assets/screens-upload.svg)
+
+![](./assets/screens-change-pass.svg)
