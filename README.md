@@ -40,6 +40,6 @@
 
 ## Use-case диаграмма системы
 
-![](https://github.com/ell1jah/bmstu_web/blob/lab1/assets/use-case-auth.png)
+![](https://github.com/ell1jah/bmstu_web/blob/lab1/assets/use-case-auth.jpg)
 
-![](https://github.com/ell1jah/bmstu_web/blob/lab1/assets/use-case-nonauth.png)
+![](https://github.com/ell1jah/bmstu_web/blob/lab1/assets/use-case-nonauth.jpg)
