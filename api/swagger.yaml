@@ -53,7 +53,7 @@ paths:
             schema:
               $ref: "#/components/schemas/Post"
       responses:
-        '200':
+        '201':
           description: Successful response with a created post
           content:
             application/json:
@@ -121,7 +121,7 @@ paths:
           schema:
             type: integer
       responses:
-        '204':
+        '200':
           description: Successful response
         '401':
           description: User is unauthorized
@@ -142,7 +142,7 @@ paths:
           schema:
             type: integer
       responses:
-        '204':
+        '200':
           description: Successful response
         '401':
           description: User is unauthorized
@@ -163,7 +163,7 @@ paths:
           schema:
             type: integer
       responses:
-        '204':
+        '200':
           description: Successful response
         '401':
           description: User is unauthorized
@@ -235,12 +235,141 @@ paths:
             schema:
               $ref: "#/components/schemas/Comment"
       responses:
-        '200':
+        '201':
           description: Successful response with a created comment
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Comment"
+        '400':
+          description: Incorrect input data
+        '401':
+          description: User is unauthorized
+        "500":
+          description: Internal server error
+  /users/me:
+    get:
+      summary: Get authed user
+      tags:
+        - User
+      operationId: getAuthedUser
+      responses:
+        '200':
+          description: Successful response with a user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        '401':
+          description: User is unauthorized
+        "500":
+          description: Internal server error
+  /users/changepass:
+    post:
+      summary: Change authed user pass
+      tags:
+        - User
+      operationId: changePass
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserPassword"
+      responses:
+        '200':
+          description: Successful response
+        '400':
+          description: Incorrect input data
+        '401':
+          description: User is unauthorized
+        "500":
+          description: Internal server error
+  /users/signin:
+    post:
+      summary: User sign in
+      tags:
+        - User
+      operationId: signIn
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        '200':
+          description: Successful response
+        '400':
+          description: Incorrect input data
+        '401':
+          description: Bad password
+        '404':
+          description: User not found
+        "500":
+          description: Internal server error
+  /users/signup:
+    post:
+      summary: User sign up
+      tags:
+        - User
+      operationId: signUp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        '201':
+          description: Successful response
+        '400':
+          description: Incorrect input data
+        '409':
+          description: Login is already used
+        "500":
+          description: Internal server error
+  /images/{imageID}:
+    get:
+      summary: Get image
+      tags:
+        - Image
+      operationId: getImage
+      parameters: 
+        - name: imageID
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response with an image
+          content:
+            image/png: {}
+        '404':
+          description: Image not found
+        "500":
+          description: Internal server error
+  /images:
+    post:
+      summary: Upload image
+      tags:
+        - Image
+      operationId: uploadImage
+      requestBody:
+        required: true
+        content:
+          image/png:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '201':
+          description: Successful response with image
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImageID"
         '400':
           description: Incorrect input data
         '401':
@@ -362,3 +491,44 @@ components:
       type: array
       items:
         $ref: "#/components/schemas/Comment"
+    User:
+      type: object
+      required:
+        - userID
+        - login
+        - password
+      properties:
+        userID:
+          readOnly: true
+          type: integer
+          example: 72
+        login:
+          type: string
+          example: zxccursed
+        password:
+          writeOnly: true
+          type: string
+          example: larchic322
+    UserPassword:
+      type: object
+      required:
+        - oldPassword
+        - newPassword
+      properties:
+        oldPassword:
+          writeOnly: true
+          type: string
+          example: larchic322
+        newPassword:
+          writeOnly: true
+          type: string
+          example: avden281
+    ImageID:
+      type: object
+      required:
+        - imageID
+      properties:
+        imageID:
+          readOnly: true
+          type: integer
+          example: 1384013
