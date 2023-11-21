@@ -1,0 +1,534 @@
+openapi: 3.0.3
+info:
+  title: Restful API for web app to share cloth goods
+  version: 1.1.0
+servers:
+  - url: https://api.allcloth.com
+paths:
+  /posts:
+    get:
+      summary: Get posts with filters
+      tags:
+        - Posts
+      operationId: findPosts
+      parameters: 
+        - name: sex
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - male
+              - female
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - shoes
+              - outerwear
+              - underwear
+              - accessories
+      responses:
+        '200':
+          description: Successful response with a list of posts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Posts"
+        '400':
+          description: Incorrect input data
+        "500":
+          description: Internal server error
+    post:
+      summary: Create post
+      tags:
+        - Posts
+      operationId: createPost
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Post"
+      responses:
+        '201':
+          description: Successful response with a created post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        '400':
+          description: Incorrect input data
+        '401':
+          description: User is unauthorized
+        "500":
+          description: Internal server error
+  /posts/{postID}:
+    get:
+      summary: Get post by id
+      tags:
+        - Posts
+      operationId: getPostByID
+      parameters: 
+        - name: postID
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response with a post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        '404':
+          description: Post not found
+        "500":
+          description: Internal server error
+    delete:
+      summary: Delete post by id
+      tags:
+        - Posts
+      operationId: deletePost
+      parameters: 
+        - name: postID
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Post is deleted
+        '401':
+          description: User is unauthorized
+        '404':
+          description: Post not found
+        "500":
+          description: Internal server error
+  /posts/{postID}/like:
+    put:
+      summary: Like a post
+      tags:
+        - Posts
+      operationId: likePost
+      parameters:
+        - name: postID
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: User is unauthorized
+        '404':
+          description: Post not found
+        "500":
+          description: Internal server error
+  /posts/{postID}/dislike:
+    put:
+      summary: Dislike a post
+      tags:
+        - Posts
+      operationId: dislikePost
+      parameters:
+        - name: postID
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: User is unauthorized
+        '404':
+          description: Post not found
+        "500":
+          description: Internal server error
+  /posts/{postID}/unrate:
+    delete:
+      summary: Unrate a post
+      tags:
+        - Posts
+      operationId: unratePost
+      parameters:
+        - name: postID
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: User is unauthorized
+        '404':
+          description: Post not found
+        "500":
+          description: Internal server error
+  /users/{userID}/posts:
+    get:
+      summary: Get users posts
+      tags:
+        - Posts
+      operationId: usersPosts
+      parameters:
+        - name: userID
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response with a list of posts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Posts"
+        '404':
+          description: Post not found
+        "500":
+          description: Internal server error
+  /posts/{postID}/comments:
+    get:
+      summary: Get post comments
+      tags:
+        - Comment
+      operationId: postComments
+      parameters:
+        - name: postID
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response with a list of comments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comments"
+        '404':
+          description: Post not found
+        "500":
+          description: Internal server error
+    post:
+      summary: Create post comment
+      tags:
+        - Comment
+      operationId: createComment
+      parameters:
+        - name: postID
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Comment"
+      responses:
+        '201':
+          description: Successful response with a created comment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+        '400':
+          description: Incorrect input data
+        '401':
+          description: User is unauthorized
+        "500":
+          description: Internal server error
+  /users/me:
+    get:
+      summary: Get authed user
+      tags:
+        - User
+      operationId: getAuthedUser
+      responses:
+        '200':
+          description: Successful response with a user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        '401':
+          description: User is unauthorized
+        "500":
+          description: Internal server error
+  /users/changepass:
+    post:
+      summary: Change authed user pass
+      tags:
+        - User
+      operationId: changePass
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserPassword"
+      responses:
+        '200':
+          description: Successful response
+        '400':
+          description: Incorrect input data
+        '401':
+          description: User is unauthorized
+        "500":
+          description: Internal server error
+  /users/signin:
+    post:
+      summary: User sign in
+      tags:
+        - User
+      operationId: signIn
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        '200':
+          description: Successful response
+        '400':
+          description: Incorrect input data
+        '401':
+          description: Bad password
+        '404':
+          description: User not found
+        "500":
+          description: Internal server error
+  /users/signup:
+    post:
+      summary: User sign up
+      tags:
+        - User
+      operationId: signUp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        '201':
+          description: Successful response
+        '400':
+          description: Incorrect input data
+        '409':
+          description: Login is already used
+        "500":
+          description: Internal server error
+  /images/{imageID}:
+    get:
+      summary: Get image
+      tags:
+        - Image
+      operationId: getImage
+      parameters: 
+        - name: imageID
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response with an image
+          content:
+            image/png: {}
+        '404':
+          description: Image not found
+        "500":
+          description: Internal server error
+  /images:
+    post:
+      summary: Upload image
+      tags:
+        - Image
+      operationId: uploadImage
+      requestBody:
+        required: true
+        content:
+          image/png:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '201':
+          description: Successful response with image
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImageID"
+        '400':
+          description: Incorrect input data
+        '401':
+          description: User is unauthorized
+        "500":
+          description: Internal server error
+components:
+  schemas:
+    Post:
+      type: object
+      required:
+        - postID
+        - creatorID
+        - creatorName
+        - photoID
+        - createDate
+        - category
+        - brand
+        - link
+        - description
+        - likeCnt
+        - dislikeCnt
+      properties:
+        postID:
+          readOnly: true
+          type: integer
+          example: 34
+        creatorID:
+          readOnly: true
+          type: integer
+          example: 2
+        creatorName:
+          readOnly: true
+          type: string
+          example: zxccursed
+        photoID:
+          type: integer
+          example: 3425
+        createDate:
+          readOnly: true
+          type: string
+          format: date
+          example: 2017-07-21
+        category:
+          type: string
+          enum:
+              - shoes
+              - outerwear
+              - underwear
+              - accessories
+          example: shoes
+        brand:
+          type: string
+          example: Carol Christian Poell
+        link:
+          type: string
+          format: uri
+          example: https://www.lamoda.ru/p/mp002xm0vaa3/clothes-lylescott-trusy-sht
+        description:
+          type: string
+          minLength: 1
+          example: Very stylish winter shirt
+        likeCnt:
+          readOnly: true
+          type: integer
+          example: 23
+        dislikeCnt:
+          readOnly: true
+          type: integer
+          example: 54
+        isLiked:
+          readOnly: true
+          type: boolean
+          example: false
+        isDisliked:
+          readOnly: true
+          type: boolean
+          example: true
+    Posts:
+      type: array
+      items:
+        $ref: "#/components/schemas/Post"
+    Comment:
+      type: object
+      required:
+        - commentID
+        - postID
+        - creatorID
+        - creatorName
+        - createDate
+        - message
+      properties:
+        commentID:
+          readOnly: true
+          type: integer
+          example: 72
+        postID:
+          readOnly: true
+          type: integer
+          example: 34
+        creatorID:
+          readOnly: true
+          type: integer
+          example: 2
+        creatorName:
+          readOnly: true
+          type: string
+          example: zxccursed
+        createDate:
+          readOnly: true
+          type: string
+          format: date
+          example: 2017-07-21
+        message:
+          type: string
+          minLength: 1
+          example: Very good item!
+    Comments:
+      type: array
+      items:
+        $ref: "#/components/schemas/Comment"
+    User:
+      type: object
+      required:
+        - userID
+        - login
+        - password
+      properties:
+        userID:
+          readOnly: true
+          type: integer
+          example: 72
+        login:
+          type: string
+          example: zxccursed
+        password:
+          writeOnly: true
+          type: string
+          example: larchic322
+    UserPassword:
+      type: object
+      required:
+        - oldPassword
+        - newPassword
+      properties:
+        oldPassword:
+          writeOnly: true
+          type: string
+          example: larchic322
+        newPassword:
+          writeOnly: true
+          type: string
+          example: avden281
+    ImageID:
+      type: object
+      required:
+        - imageID
+      properties:
+        imageID:
+          readOnly: true
+          type: integer
+          example: 1384013
