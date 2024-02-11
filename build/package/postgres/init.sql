@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS posts (
     created_at DATE NOT NULL,
     image_id VARCHAR(260) NOT NULL,
     category VARCHAR(64) NOT NULL,
+    sex VARCHAR(16) NOT NULL,
     brand VARCHAR(64) NOT NULL,
     description TEXT NOT NULL,
     link VARCHAR(260) NOT NULL

@@ -133,7 +133,6 @@ func (h *handler) SignUp(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, model.ErrBadRequest.Error())
 	}
 
-	c.Logger().Info(reqSign)
 	_, err = govalidator.ValidateStruct(reqSign)
 	if err != nil {
 		c.Logger().Error(err)
@@ -154,5 +153,5 @@ func (h *handler) SignUp(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, model.ErrInternalServerError.Error())
 	}
 
-	return c.JSON(http.StatusOK, dto.RespTokenFromString(token))
+	return c.JSON(http.StatusCreated, dto.RespTokenFromString(token))
 }
