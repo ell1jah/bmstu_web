@@ -103,6 +103,7 @@ require (
 	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/pkg/errors v0.9.1
+	github.com/rs/xid v1.5.0
 	go.uber.org/multierr v1.10.0 // indirect
 	gorm.io/gorm v1.25.7-0.20240204074919-46816ad31dde
 )

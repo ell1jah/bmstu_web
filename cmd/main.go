@@ -5,6 +5,8 @@ import (
 	commentDelivery "github.com/ell1jah/bmstu_web/internal/comment/delivery"
 	commentLogic "github.com/ell1jah/bmstu_web/internal/comment/logic"
 	commentRepository "github.com/ell1jah/bmstu_web/internal/comment/repository"
+	imageDelivery "github.com/ell1jah/bmstu_web/internal/image/delivery"
+	imageLogic "github.com/ell1jah/bmstu_web/internal/image/logic"
 	jwtManager "github.com/ell1jah/bmstu_web/internal/pkg/jwt"
 	postDelivery "github.com/ell1jah/bmstu_web/internal/post/delivery"
 	postLogic "github.com/ell1jah/bmstu_web/internal/post/logic"
@@ -88,6 +90,7 @@ func main() {
 	userLogic := userLogic.NewLogic(userRepo)
 	postLogic := postLogic.NewLogic(postRepo, userRepo, rateRepo)
 	commentLogic := commentLogic.NewLogic(commentRepo, userRepo)
+	imageLogic := imageLogic.NewLogic()
 
 	e := echo.New()
 	initAdmin(e)
@@ -126,6 +129,7 @@ func main() {
 	userDelivery.NewHandler(userLogic, sessionManager).SetRoutes(e, authMiddleware)
 	postDelivery.NewHandler(postLogic).SetRoutes(e, authMiddleware)
 	commentDelivery.NewHandler(commentLogic).SetRoutes(e, authMiddleware)
+	imageDelivery.NewHandler(imageLogic).SetRoutes(e, authMiddleware)
 
 	s := server.NewServer(e)
 	if err := s.Start(); err != nil {
