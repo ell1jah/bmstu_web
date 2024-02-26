@@ -1,8 +1,15 @@
 package logic
 
 import (
+	"os"
+
 	"github.com/ell1jah/bmstu_web/model"
 	"github.com/pkg/errors"
+)
+
+const (
+	imageDir = "images/"
+	pngExt   = ".png"
 )
 
 type PostRepository interface {
@@ -101,6 +108,12 @@ func (l *logic) GetPostsWithParams(userId uint64, params model.PostParams) ([]*m
 }
 
 func (l *logic) CreatePost(post *model.Post) error {
+	if _, err := os.Stat(imageDir + post.ImageID + pngExt); errors.Is(err, os.ErrNotExist) {
+		return errors.Wrap(model.ErrBadRequest, "no image")
+	} else if err != nil {
+		return errors.Wrap(err, "can't find image")
+	}
+
 	err := l.postRepository.CreatePost(post)
 	if err != nil {
 		return errors.Wrap(err, "post repository error")

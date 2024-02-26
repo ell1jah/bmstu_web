@@ -35,6 +35,10 @@ import (
 	"gorm.io/gorm"
 )
 
+// @title WS Swagger API
+// @version 1.0
+// @host localhost:8080
+
 // var testCfgPg = postgres.Config{DSN: "host=localhost user=postgres password=postgres port=13080"}
 
 var prodCfgPg = postgres.Config{DSN: "host=cloth_pg user=postgres password=postgres port=5432"}

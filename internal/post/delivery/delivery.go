@@ -7,8 +7,8 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
 
-	"github.com/ell1jah/bmstu_web/internal/pkg/httperror"
 	jwtManager "github.com/ell1jah/bmstu_web/internal/pkg/jwt"
 	"github.com/ell1jah/bmstu_web/model"
 	"github.com/ell1jah/bmstu_web/model/dto"
@@ -63,7 +63,7 @@ func (h *handler) GetPost(c echo.Context) error {
 	post, err := h.postService.GetPost(userClaims.User.ID, postId)
 	if err != nil {
 		c.Logger().Error(err)
-		return httperror.HandleError(err)
+		return handleError(err)
 	}
 
 	return c.JSON(http.StatusOK, dto.RespPostFromPost(post))
@@ -85,7 +85,7 @@ func (h *handler) GetUsersPosts(c echo.Context) error {
 	posts, err := h.postService.GetUsersPosts(userClaims.User.ID, ownerId)
 	if err != nil {
 		c.Logger().Error(err)
-		return httperror.HandleError(err)
+		return handleError(err)
 	}
 
 	return c.JSON(http.StatusOK, dto.RespPostsFromPosts(posts))
@@ -116,7 +116,7 @@ func (h *handler) GetPostsWithParams(c echo.Context) error {
 	posts, err := h.postService.GetPostsWithParams(userClaims.User.ID, *params)
 	if err != nil {
 		c.Logger().Error(err)
-		return httperror.HandleError(err)
+		return handleError(err)
 	}
 
 	return c.JSON(http.StatusOK, dto.RespPostsFromPosts(posts))
@@ -149,7 +149,7 @@ func (h *handler) CreatePost(c echo.Context) error {
 	err = h.postService.CreatePost(post)
 	if err != nil {
 		c.Logger().Error(err)
-		return httperror.HandleError(err)
+		return handleError(err)
 	}
 
 	return c.JSON(http.StatusCreated, dto.RespPostFromPost(post))
@@ -172,7 +172,7 @@ func (h *handler) DeletePost(c echo.Context) error {
 	err = h.postService.DeletePost(userId, postId)
 	if err != nil {
 		c.Logger().Error(err)
-		return httperror.HandleError(err)
+		return handleError(err)
 	}
 
 	return c.NoContent(http.StatusOK)
@@ -195,7 +195,7 @@ func (h *handler) LikePost(c echo.Context) error {
 	err = h.postService.LikePost(userId, postId)
 	if err != nil {
 		c.Logger().Error(err)
-		return httperror.HandleError(err)
+		return handleError(err)
 	}
 
 	return c.NoContent(http.StatusOK)
@@ -218,7 +218,7 @@ func (h *handler) DislikePost(c echo.Context) error {
 	err = h.postService.DislikePost(userId, postId)
 	if err != nil {
 		c.Logger().Error(err)
-		return httperror.HandleError(err)
+		return handleError(err)
 	}
 
 	return c.NoContent(http.StatusOK)
@@ -241,8 +241,26 @@ func (h *handler) UnratePost(c echo.Context) error {
 	err = h.postService.UnratePost(userId, postId)
 	if err != nil {
 		c.Logger().Error(err)
-		return httperror.HandleError(err)
+		return handleError(err)
 	}
 
 	return c.NoContent(http.StatusOK)
+}
+
+func handleError(err error) *echo.HTTPError {
+	causeErr := errors.Cause(err)
+	switch {
+	case errors.Is(causeErr, model.ErrNotFound):
+		return echo.NewHTTPError(http.StatusNotFound, model.ErrNotFound.Error())
+	case errors.Is(causeErr, model.ErrBadRequest):
+		return echo.NewHTTPError(http.StatusBadRequest, model.ErrBadRequest.Error())
+	case errors.Is(causeErr, model.ErrPermissionDenied):
+		return echo.NewHTTPError(http.StatusForbidden, model.ErrPermissionDenied.Error())
+	case errors.Is(causeErr, model.ErrInvalidPassword):
+		return echo.NewHTTPError(http.StatusBadRequest, model.ErrInvalidPassword.Error())
+	case errors.Is(causeErr, model.ErrConflictPassword):
+		return echo.NewHTTPError(http.StatusBadRequest, model.ErrConflictPassword.Error())
+	default:
+		return echo.NewHTTPError(http.StatusInternalServerError, causeErr.Error())
+	}
 }

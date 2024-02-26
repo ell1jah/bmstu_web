@@ -13,6 +13,9 @@ create_tables:
 drop_tables:
 	psql postgresql://postgres:postgres@localhost:13080/postgres -f build/package/postgres/drop_all.sql
 
+gen-swagg:
+	swag init --parseDependency --parseInternal --parseDepth 3 -g ./cmd/main.go -o ./docs
+
 # generate_data:
 # 	cd gen && python3 gen.py
 

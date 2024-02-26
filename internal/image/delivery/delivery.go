@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
 
-	"github.com/ell1jah/bmstu_web/internal/pkg/httperror"
 	"github.com/ell1jah/bmstu_web/model"
 	"github.com/ell1jah/bmstu_web/model/dto"
 )
@@ -41,7 +41,7 @@ func (h *handler) GetImage(c echo.Context) error {
 	image, err := h.imageService.GetImage(imageId)
 	if err != nil {
 		c.Logger().Error(err)
-		return httperror.HandleError(err)
+		return handleError(err)
 	}
 
 	return c.Stream(http.StatusOK, "Image/png", image)
@@ -63,8 +63,26 @@ func (h *handler) CreateImage(c echo.Context) error {
 	id, err := h.imageService.CreateImage(src)
 	if err != nil {
 		c.Logger().Error(err)
-		return httperror.HandleError(err)
+		return handleError(err)
 	}
 
 	return c.JSON(http.StatusCreated, dto.RespImageFromID(id))
+}
+
+func handleError(err error) *echo.HTTPError {
+	causeErr := errors.Cause(err)
+	switch {
+	case errors.Is(causeErr, model.ErrNotFound):
+		return echo.NewHTTPError(http.StatusNotFound, model.ErrNotFound.Error())
+	case errors.Is(causeErr, model.ErrBadRequest):
+		return echo.NewHTTPError(http.StatusBadRequest, model.ErrBadRequest.Error())
+	case errors.Is(causeErr, model.ErrPermissionDenied):
+		return echo.NewHTTPError(http.StatusForbidden, model.ErrPermissionDenied.Error())
+	case errors.Is(causeErr, model.ErrInvalidPassword):
+		return echo.NewHTTPError(http.StatusBadRequest, model.ErrInvalidPassword.Error())
+	case errors.Is(causeErr, model.ErrConflictPassword):
+		return echo.NewHTTPError(http.StatusBadRequest, model.ErrConflictPassword.Error())
+	default:
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal error")
+	}
 }

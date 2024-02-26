@@ -12,7 +12,7 @@ type pgPost struct {
 	ID          uint64
 	UserID      uint64
 	CreatedAt   time.Time
-	ImageID     uint64
+	ImageID     string
 	Category    string
 	Sex         string
 	Brand       string

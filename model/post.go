@@ -7,7 +7,7 @@ type Post struct {
 	UserID      uint64
 	UserName    string
 	Date        time.Time
-	ImageID     uint64
+	ImageID     string
 	Category    string
 	Sex         string
 	Brand       string

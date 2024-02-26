@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// TODO удалить
 func HandleError(err error) *echo.HTTPError {
 	causeErr := errors.Cause(err)
 	switch {
@@ -17,6 +18,10 @@ func HandleError(err error) *echo.HTTPError {
 		return echo.NewHTTPError(http.StatusBadRequest, model.ErrBadRequest.Error())
 	case errors.Is(causeErr, model.ErrPermissionDenied):
 		return echo.NewHTTPError(http.StatusForbidden, model.ErrPermissionDenied.Error())
+	case errors.Is(causeErr, model.ErrInvalidPassword):
+		return echo.NewHTTPError(http.StatusBadRequest, model.ErrInvalidPassword.Error())
+	case errors.Is(causeErr, model.ErrConflictPassword):
+		return echo.NewHTTPError(http.StatusBadRequest, model.ErrConflictPassword.Error())
 	default:
 		return echo.NewHTTPError(http.StatusInternalServerError, causeErr.Error())
 	}

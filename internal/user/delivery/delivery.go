@@ -6,8 +6,8 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
 
-	"github.com/ell1jah/bmstu_web/internal/pkg/httperror"
 	jwtManager "github.com/ell1jah/bmstu_web/internal/pkg/jwt"
 	"github.com/ell1jah/bmstu_web/model"
 	"github.com/ell1jah/bmstu_web/model/dto"
@@ -55,7 +55,7 @@ func (h *handler) GetMe(c echo.Context) error {
 	user, err := h.userService.GetUserByID(userId)
 	if err != nil {
 		c.Logger().Error(err)
-		return httperror.HandleError(err)
+		return handleError(err)
 	}
 
 	return c.JSON(http.StatusOK, dto.RespGetMeFromUser(user))
@@ -88,7 +88,7 @@ func (h *handler) ChangePass(c echo.Context) error {
 	err = h.userService.ChangePass(chpass)
 	if err != nil {
 		c.Logger().Error(err)
-		return httperror.HandleError(err)
+		return echo.NewHTTPError(http.StatusBadRequest, model.ErrConflictPassword.Error())
 	}
 
 	return c.NoContent(http.StatusOK)
@@ -113,7 +113,7 @@ func (h *handler) SignIn(c echo.Context) error {
 	user, err := h.userService.SignIn(sign)
 	if err != nil {
 		c.Logger().Error(err)
-		return httperror.HandleError(err)
+		return handleError(err)
 	}
 
 	token, err := h.sessionManager.CreateSession(jwtManager.FromModelUsertoUserClaims(user))
@@ -144,7 +144,7 @@ func (h *handler) SignUp(c echo.Context) error {
 	user, err := h.userService.SignUp(sign)
 	if err != nil {
 		c.Logger().Error(err)
-		return httperror.HandleError(err)
+		return handleError(err)
 	}
 
 	token, err := h.sessionManager.CreateSession(jwtManager.FromModelUsertoUserClaims(user))
@@ -154,4 +154,22 @@ func (h *handler) SignUp(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, dto.RespTokenFromString(token))
+}
+
+func handleError(err error) *echo.HTTPError {
+	causeErr := errors.Cause(err)
+	switch {
+	case errors.Is(causeErr, model.ErrNotFound):
+		return echo.NewHTTPError(http.StatusNotFound, model.ErrNotFound.Error())
+	case errors.Is(causeErr, model.ErrBadRequest):
+		return echo.NewHTTPError(http.StatusBadRequest, model.ErrBadRequest.Error())
+	case errors.Is(causeErr, model.ErrPermissionDenied):
+		return echo.NewHTTPError(http.StatusForbidden, model.ErrPermissionDenied.Error())
+	case errors.Is(causeErr, model.ErrInvalidPassword):
+		return echo.NewHTTPError(http.StatusBadRequest, model.ErrInvalidPassword.Error())
+	case errors.Is(causeErr, model.ErrConflictPassword):
+		return echo.NewHTTPError(http.StatusBadRequest, model.ErrConflictPassword.Error())
+	default:
+		return echo.NewHTTPError(http.StatusInternalServerError, causeErr.Error())
+	}
 }

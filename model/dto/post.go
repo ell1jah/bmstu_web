@@ -11,7 +11,7 @@ type RespPost struct {
 	UserID      uint64    `json:"creatorID"`
 	UserName    string    `json:"creatorName"`
 	Date        time.Time `json:"createDate"`
-	ImageID     uint64    `json:"photoID"`
+	ImageID     string    `json:"photoID"`
 	Category    string    `json:"category"`
 	Sex         string    `json:"sex"`
 	Brand       string    `json:"brand"`
@@ -52,12 +52,12 @@ func RespPostsFromPosts(posts []*model.Post) []*RespPost {
 }
 
 type ReqPost struct {
-	ImageID     uint64 `json:"photoID"`
+	ImageID     string `json:"photoID" valid:"-"`
 	Category    string `json:"category" valid:"in(shoes|outerwear|underwear|accessories)"`
 	Sex         string `json:"sex" valid:"in(male|female)"`
-	Brand       string `json:"brand"`
-	Description string `json:"description"`
-	Link        string `json:"link" valid:"URL"`
+	Brand       string `json:"brand" valid:"-"`
+	Description string `json:"description" valid:"-"`
+	Link        string `json:"link" valid:"-"`
 }
 
 func (rp *ReqPost) ToPost() *model.Post {
@@ -72,8 +72,8 @@ func (rp *ReqPost) ToPost() *model.Post {
 }
 
 type ReqPostParams struct {
-	Category string `json:"category" valid:"in(shoes|outerwear|underwear|accessories)"`
-	Sex      string `json:"sex" valid:"in(male|female)"`
+	Category string `query:"category" valid:"in(shoes|outerwear|underwear|accessories),optional"`
+	Sex      string `query:"sex" valid:"in(male|female),optional"`
 }
 
 func (rpp *ReqPostParams) ToPostParams() *model.PostParams {
