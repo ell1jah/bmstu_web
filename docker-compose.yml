@@ -15,6 +15,21 @@ services:
       POSTGRES_DB: postgres
       POSTGRES_PASSWORD: postgres
 
+  cloth_pg_replica:
+    image: "postgres:latest"
+    ports:
+      - "13081:5432"
+    networks:
+      - mynetwork
+    volumes:
+      - ./postgres/cloth_pg_replica:/var/lib/postgresql/data
+    depends_on:
+      - cloth_pg
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+
   pgadmin: 
     container_name: pgadmin4 
     image: dpage/pgadmin4 
@@ -29,18 +44,63 @@ services:
     networks:
       - mynetwork
 
-  server:
+  server-1:
     build:
       context: ./
       dockerfile: ./build/package/server/Dockerfile
     restart: always
-    container_name: server
+    container_name: server-1
     volumes:
       - ./images:/images
     depends_on:
       - cloth_pg
     ports:
       - "8080:8080"
+    networks:
+      - mynetwork
+
+  server-2:
+    build:
+      context: ./
+      dockerfile: ./build/package/server/Dockerfile
+    restart: always
+    container_name: server-2
+    volumes:
+      - ./images:/images
+    depends_on:
+      - cloth_pg
+    ports:
+      - "9080:8080"
+    networks:
+      - mynetwork
+
+  server-3:
+    build:
+      context: ./
+      dockerfile: ./build/package/server/Dockerfile
+    restart: always
+    container_name: server-3
+    volumes:
+      - ./images:/images
+    depends_on:
+      - cloth_pg
+    ports:
+      - "10080:8080"
+    networks:
+      - mynetwork
+
+  server-mirror:
+    build:
+      context: ./
+      dockerfile: ./build/package/server/Dockerfile
+    restart: always
+    container_name: server-mirror
+    volumes:
+      - ./images:/images
+    depends_on:
+      - cloth_pg
+    ports:
+      - "11080:8080"
     networks:
       - mynetwork
       
@@ -50,7 +110,7 @@ services:
     volumes:
       - grafana-storage:/var/lib/grafana
     depends_on:
-      - server
+      - server-1
     ports:
       - "3000:3000"
     networks:
