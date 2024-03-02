@@ -1,0 +1,160 @@
+version: "3.5"
+services:
+  cloth_pg:
+    image: "postgres:latest"
+    ports:
+      - "13080:5432"
+    networks:
+      - mynetwork
+    volumes:
+      - ./build/package/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      # - ./gen:/home/gen
+      - ./postgres/cloth_pg:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+
+  cloth_pg_replica:
+    image: "postgres:latest"
+    ports:
+      - "13081:5432"
+    networks:
+      - mynetwork
+    volumes:
+      - ./postgres/cloth_pg_replica:/var/lib/postgresql/data
+    depends_on:
+      - cloth_pg
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+
+  pgadmin: 
+    container_name: pgadmin4 
+    image: dpage/pgadmin4 
+    restart: always 
+    environment: 
+        PGADMIN_DEFAULT_EMAIL: admin@admin.com 
+        PGADMIN_DEFAULT_PASSWORD: root 
+    ports: 
+        - "5050:80" 
+    depends_on: 
+      - cloth_pg
+    networks:
+      - mynetwork
+
+  server-1:
+    build:
+      context: ./
+      dockerfile: ./build/package/server/Dockerfile
+    restart: always
+    container_name: server-1
+    volumes:
+      - ./images:/images
+    depends_on:
+      - cloth_pg
+    ports:
+      - "8080:8080"
+    networks:
+      - mynetwork
+
+  server-2:
+    build:
+      context: ./
+      dockerfile: ./build/package/server/Dockerfile
+    restart: always
+    container_name: server-2
+    volumes:
+      - ./images:/images
+    depends_on:
+      - cloth_pg
+    ports:
+      - "9080:8080"
+    networks:
+      - mynetwork
+
+  server-3:
+    build:
+      context: ./
+      dockerfile: ./build/package/server/Dockerfile
+    restart: always
+    container_name: server-3
+    volumes:
+      - ./images:/images
+    depends_on:
+      - cloth_pg
+    ports:
+      - "10080:8080"
+    networks:
+      - mynetwork
+
+  server-mirror:
+    build:
+      context: ./
+      dockerfile: ./build/package/server/Dockerfile
+    restart: always
+    container_name: server-mirror
+    volumes:
+      - ./images:/images
+    depends_on:
+      - cloth_pg
+    ports:
+      - "11080:8080"
+    networks:
+      - mynetwork
+      
+  grafana:
+    image: "grafana/grafana-oss"
+    restart: always
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - server-1
+    ports:
+      - "3000:3000"
+    networks:
+      - mynetwork
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./build/package/prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - 9090:9090
+    restart: always
+    networks:
+      - mynetwork
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    expose:
+      - 9100
+    ports:
+      - 9100:9100
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    external: true
+
+volumes:
+  prometheus_data:
+  grafana-storage:
